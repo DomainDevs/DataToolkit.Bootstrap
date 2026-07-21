@@ -4,6 +4,8 @@ namespace DataToolkit.Bootstrap.Diagnostics;
 
 internal static class BootstrapConsole
 {
+    private static readonly StringBuilder Buffer = new(1024);
+
     static BootstrapConsole()
     {
         Console.OutputEncoding = Encoding.UTF8;
@@ -11,9 +13,11 @@ internal static class BootstrapConsole
 
     internal static void Header()
     {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.Write("\n » INICIANDO: DataToolkit Bootstrap\n\n");
-        Console.ResetColor();
+        Buffer.Clear();
+
+        Buffer.AppendLine();
+        Buffer.AppendLine(" » INICIANDO: DataToolkit Bootstrap");
+        Buffer.AppendLine();
     }
 
     internal static void Registered(
@@ -21,22 +25,34 @@ internal static class BootstrapConsole
         string implementation,
         string lifetime)
     {
-        Console.WriteLine($"🧩 {service} -> {implementation} ({lifetime})");
+        Buffer.Append("🧩 ");
+        Buffer.Append(service);
+        Buffer.Append(" -> ");
+        Buffer.Append(implementation);
+        Buffer.Append(" (");
+        Buffer.Append(lifetime);
+        Buffer.AppendLine(")");
     }
 
     internal static void Skipped(
         string implementation,
         string reason)
     {
-        Console.WriteLine($"[SKIP] {implementation} ({reason})");
+        Buffer.Append("[SKIP] ");
+        Buffer.Append(implementation);
+        Buffer.Append(" (");
+        Buffer.Append(reason);
+        Buffer.AppendLine(")");
     }
 
     internal static void Error(
         string implementation,
         Exception exception)
     {
-        Console.WriteLine($"⚠️ [ERROR] {implementation}");
-        Console.WriteLine($"     {exception.Message}");
+        Buffer.Append("⚠️ [ERROR] ");
+        Buffer.AppendLine(implementation);
+        Buffer.Append("     ");
+        Buffer.AppendLine(exception.Message);
     }
 
     internal static void Summary(
@@ -44,16 +60,28 @@ internal static class BootstrapConsole
         int skipped,
         double nanoseconds)
     {
-        Console.Write(
-$"""
+        Buffer.AppendLine();
+        Buffer.AppendLine("--------------- Summary ----------------");
+        Buffer.Append("Registered : ");
+        Buffer.AppendLine(registered.ToString());
 
---------------- Summary ----------------
-Registered : {registered}
-Skipped    : {skipped}
-Elapsed    : {FormatElapsed(nanoseconds)} ({nanoseconds:N0} ns)
-----------------------------------------
+        Buffer.Append("Skipped    : ");
+        Buffer.AppendLine(skipped.ToString());
 
-""");
+        Buffer.Append("Elapsed    : ");
+        Buffer.Append(FormatElapsed(nanoseconds));
+        Buffer.Append(" (");
+        Buffer.Append(nanoseconds.ToString("N0"));
+        Buffer.AppendLine(" ns)");
+
+        Buffer.AppendLine("----------------------------------------");
+        Buffer.AppendLine();
+
+        Console.ForegroundColor = ConsoleColor.Yellow;
+
+        Console.Write(Buffer.ToString());
+
+        Console.ResetColor();
     }
 
     private static string FormatElapsed(double nanoseconds)

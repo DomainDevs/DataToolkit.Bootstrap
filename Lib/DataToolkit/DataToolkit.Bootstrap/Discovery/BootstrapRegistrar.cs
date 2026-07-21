@@ -14,12 +14,8 @@ internal static class BootstrapRegistrar
 
         var stopwatch = Stopwatch.StartNew();
 
-        List<CandidateType> registrations = [];
-
-        foreach (CandidateType candidate in candidates)
-        {
-            registrations.Add(candidate);
-        }
+        List<CandidateType> registrations =
+            candidates as List<CandidateType> ?? new(candidates);
 
         registrations.Sort(static (x, y) =>
             x.Registration.Priority.CompareTo(y.Registration.Priority));

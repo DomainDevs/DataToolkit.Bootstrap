@@ -9,18 +9,18 @@ internal static class TypeScanner
     {
         ArgumentNullException.ThrowIfNull(modules);
 
-        List<CandidateType> result = [];
+        List<CandidateType> result = new(64);
 
         foreach (BootstrapModule module in modules)
         {
             foreach (Type type in GetLoadableTypes(module.Assembly))
             {
-                if (!MatchesNamespace(type, module))
+                if (!IsCandidate(type))
                 {
                     continue;
                 }
 
-                if (!IsCandidate(type))
+                if (!MatchesNamespace(type, module))
                 {
                     continue;
                 }
@@ -33,11 +33,9 @@ internal static class TypeScanner
                     continue;
                 }
 
-                Type[] interfaces = GetPublicInterfaces(type);
-
                 result.Add(new CandidateType(
                     type,
-                    interfaces,
+                    GetPublicInterfaces(type),
                     registration));
             }
         }
@@ -48,6 +46,11 @@ internal static class TypeScanner
     private static Type[] GetPublicInterfaces(Type type)
     {
         Type[] interfaces = type.GetInterfaces();
+
+        if (interfaces.Length == 0)
+        {
+            return interfaces;
+        }
 
         int count = 0;
 
@@ -137,8 +140,10 @@ internal static class TypeScanner
             return false;
         }
 
-        if (ns != module.RootNamespace &&
-            !ns.StartsWith(module.RootNamespace + ".", StringComparison.Ordinal))
+        string rootNamespace = module.RootNamespace;
+
+        if (ns != rootNamespace &&
+            !ns.StartsWith(module.RootNamespacePrefix, StringComparison.Ordinal))
         {
             return false;
         }

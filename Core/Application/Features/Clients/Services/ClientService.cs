@@ -16,7 +16,6 @@ public sealed class ClientService : IClientService
         [
             new("Priority", "1"),
             new("Lifetime", "Singleton")
-
         ];
     }
 }

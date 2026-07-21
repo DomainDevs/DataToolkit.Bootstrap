@@ -9,26 +9,24 @@ internal static class RegistrationReader
 
     internal static ServiceRegistration Read(Type implementation)
     {
-        var registration = new ServiceRegistration();
+        ServiceRegistration registration = new();
 
-        var method = implementation.GetMethod(
+        MethodInfo? method = implementation.GetMethod(
             MethodName,
             BindingFlags.Public | BindingFlags.Static,
             binder: null,
             types: Type.EmptyTypes,
             modifiers: null);
 
-        // No existe el método
         if (method is null)
+        {
             return registration;
+        }
 
-        // Debe ser exactamente:
-        // public static KeyValuePair<string,string>[] ConfigureServices()
         if (method.ReturnType != typeof(KeyValuePair<string, string>[]))
+        {
             return registration;
-
-        if (method.GetParameters().Length != 0)
-            return registration;
+        }
 
         KeyValuePair<string, string>[]? metadata;
 
@@ -42,57 +40,65 @@ internal static class RegistrationReader
         }
 
         if (metadata is null)
-            return registration;
-
-        foreach (var item in metadata)
         {
-            var key = item.Key?.Trim();
-            var value = item.Value?.Trim();
+            return registration;
+        }
 
-            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
-                continue;
+        foreach (KeyValuePair<string, string> item in metadata)
+        {
+            string key = item.Key;
+            string value = item.Value;
 
-            switch (key.ToUpperInvariant())
+            if (string.IsNullOrEmpty(key) ||
+                string.IsNullOrEmpty(value))
             {
-                case "LIFETIME":
+                continue;
+            }
 
-                    switch (value.ToUpperInvariant())
-                    {
-                        case "SCOPED":
-                            registration.Lifetime = ServiceLifetime.Scoped;
-                            break;
+            if (key.Equals("Lifetime", StringComparison.OrdinalIgnoreCase))
+            {
+                if (value.Equals("Scoped", StringComparison.OrdinalIgnoreCase))
+                {
+                    registration.Lifetime = ServiceLifetime.Scoped;
+                }
+                else if (value.Equals("Singleton", StringComparison.OrdinalIgnoreCase))
+                {
+                    registration.Lifetime = ServiceLifetime.Singleton;
+                }
+                else if (value.Equals("Transient", StringComparison.OrdinalIgnoreCase))
+                {
+                    registration.Lifetime = ServiceLifetime.Transient;
+                }
 
-                        case "SINGLETON":
-                            registration.Lifetime = ServiceLifetime.Singleton;
-                            break;
+                continue;
+            }
 
-                        case "TRANSIENT":
-                            registration.Lifetime = ServiceLifetime.Transient;
-                            break;
-                    }
+            if (key.Equals("Priority", StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(value, out int priority))
+                {
+                    registration.Priority = priority;
+                }
 
-                    break;
+                continue;
+            }
 
-                case "PRIORITY":
+            if (key.Equals("Exclude", StringComparison.OrdinalIgnoreCase))
+            {
+                if (bool.TryParse(value, out bool exclude))
+                {
+                    registration.Exclude = exclude;
+                }
 
-                    if (int.TryParse(value, out var priority))
-                        registration.Priority = priority;
+                continue;
+            }
 
-                    break;
-
-                case "EXCLUDE":
-
-                    if (bool.TryParse(value, out var exclude))
-                        registration.Exclude = exclude;
-
-                    break;
-
-                case "ASSELF":
-
-                    if (bool.TryParse(value, out var asSelf))
-                        registration.RegisterAsSelf = asSelf;
-
-                    break;
+            if (key.Equals("AsSelf", StringComparison.OrdinalIgnoreCase))
+            {
+                if (bool.TryParse(value, out bool asSelf))
+                {
+                    registration.RegisterAsSelf = asSelf;
+                }
             }
         }
 
