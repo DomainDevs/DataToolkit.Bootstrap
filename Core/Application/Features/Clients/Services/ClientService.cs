@@ -9,7 +9,7 @@ public sealed class ClientService : IClientService
         "Michael Johnson"
     ];
 
-    
+    /*
     public static KeyValuePair<string, string>[] ConfigureServices()
     {
         return
@@ -18,4 +18,5 @@ public sealed class ClientService : IClientService
             new("Lifetime", "Singleton")
         ];
     }
+    */
 }

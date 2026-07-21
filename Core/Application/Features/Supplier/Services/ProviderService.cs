@@ -8,12 +8,12 @@ public sealed class ProviderService : IProviderService
             "Michael"
     ];
 
-
-    
+    /*    
     public static KeyValuePair<string, string>[] ConfigureServices() =>
     [
         new("Priority", "2"),
         new("Lifetime", "Singleton")
     ];
+    */
 
 }
