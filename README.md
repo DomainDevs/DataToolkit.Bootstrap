@@ -253,6 +253,6 @@ Bootstrap was created with the following principles:
 
 # License
 
-Copyright © DataToolkit.
+Copyright © DataToolkit [Fernando Poveda].
 
 License information to be defined.
