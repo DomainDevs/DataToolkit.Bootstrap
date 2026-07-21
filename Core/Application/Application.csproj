@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Features\Client\**" />
+    <Compile Remove="Features\DTOs\**" />
+    <EmbeddedResource Remove="Features\Client\**" />
+    <EmbeddedResource Remove="Features\DTOs\**" />
+    <None Remove="Features\Client\**" />
+    <None Remove="Features\DTOs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\Users\DTOs\" />
+    <Folder Include="Features\Users\Services\" />
+  </ItemGroup>
+
+</Project>
