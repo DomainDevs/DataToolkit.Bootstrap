@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 
 namespace DataToolkit.Bootstrap.Diagnostics;
 
@@ -11,6 +12,7 @@ internal static class BootstrapConsole
         Console.OutputEncoding = Encoding.UTF8;
     }
 
+    [Conditional("DEBUG")]
     internal static void Header()
     {
         Buffer.Clear();
@@ -20,6 +22,7 @@ internal static class BootstrapConsole
         Buffer.AppendLine();
     }
 
+    [Conditional("DEBUG")]
     internal static void Registered(
         string service,
         string implementation,
@@ -34,6 +37,7 @@ internal static class BootstrapConsole
         Buffer.AppendLine(")");
     }
 
+    [Conditional("DEBUG")]
     internal static void Skipped(
         string implementation,
         string reason)
@@ -45,6 +49,7 @@ internal static class BootstrapConsole
         Buffer.AppendLine(")");
     }
 
+    [Conditional("DEBUG")]
     internal static void Error(
         string implementation,
         Exception exception)
@@ -55,6 +60,7 @@ internal static class BootstrapConsole
         Buffer.AppendLine(exception.Message);
     }
 
+    [Conditional("DEBUG")]
     internal static void Summary(
         int registered,
         int skipped,
