@@ -2,3 +2,5 @@ Core/Application/obj/
 Core/Domain/obj/
 Lib/DataToolkit/DataToolkit.Bootstrap/obj/
 Samples/Basic/obj/
+Infrastructure/obj/
+.vs/
