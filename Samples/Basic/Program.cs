@@ -12,6 +12,7 @@ builder.Services.AddOpenApi();
 
 //Boostrap
 builder.Services.AddBootstrap(
+    true,
     (typeof(Application.AssemblyReference).Assembly, "Application.Features", "Services")
     //(typeof(Persistence.AssemblyReference).Assembly, "Persistence", "Repositories")
     );
