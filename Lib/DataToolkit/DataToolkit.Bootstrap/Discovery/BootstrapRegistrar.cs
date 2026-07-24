@@ -8,11 +8,12 @@ internal static class BootstrapRegistrar
 {
     internal static void Register(
         IServiceCollection services,
+        bool verbose,
         IEnumerable<CandidateType> candidates)
     {
         BootstrapConsole.Header();
 
-        var stopwatch = Stopwatch.StartNew();
+        Stopwatch stopwatch = Stopwatch.StartNew();
 
         List<CandidateType> registrations =
             candidates as List<CandidateType> ?? new(candidates);
@@ -22,41 +23,79 @@ internal static class BootstrapRegistrar
 
         int registered = 0;
 
-        foreach (var candidate in registrations)
+        foreach (CandidateType candidate in registrations)
         {
-            bool wasRegistered = false;
-            string? lifetimeName = null;
+            Type implementation = candidate.Implementation;
 
-            foreach (Type service in candidate.Services)
+            ServiceLifetime lifetime =
+                candidate.Registration.Lifetime;
+
+            string lifetimeName =
+                lifetime.ToString();
+
+            bool wasRegistered = false;
+            bool registeredAsSelf = false;
+
+            IReadOnlyList<Type> servicesToRegister =
+                candidate.Services;
+
+            // Registrar por interfaces (si existen)
+            foreach (Type service in servicesToRegister)
             {
                 services.Add(new ServiceDescriptor(
                     service,
-                    candidate.Implementation,
-                    candidate.Registration.Lifetime));
+                    implementation,
+                    lifetime));
 
-                lifetimeName ??= candidate.Registration.Lifetime.ToString();
-
-                BootstrapConsole.Registered(
-                    service.Name,
-                    candidate.Implementation.Name,
-                    lifetimeName);
+                if (verbose)
+                {
+                    BootstrapConsole.Registered(
+                        service,
+                        implementation,
+                        lifetimeName);
+                }
 
                 wasRegistered = true;
             }
 
-            if (candidate.Registration.RegisterAsSelf)
+            // Si no tiene interfaces, registrar la implementación.
+            if (servicesToRegister.Count == 0)
             {
                 services.Add(new ServiceDescriptor(
-                    candidate.Implementation,
-                    candidate.Implementation,
-                    candidate.Registration.Lifetime));
+                    implementation,
+                    implementation,
+                    lifetime));
 
-                lifetimeName ??= candidate.Registration.Lifetime.ToString();
+                if (verbose)
+                {
+                    BootstrapConsole.Registered(
+                        implementation,
+                        implementation,
+                        lifetimeName);
+                }
 
-                BootstrapConsole.Registered(
-                    candidate.Implementation.Name,
-                    candidate.Implementation.Name,
-                    lifetimeName);
+                wasRegistered = true;
+                registeredAsSelf = true;
+            }
+
+            // Si el usuario pidió RegisterAsSelf,
+            // registrar también la implementación,
+            // evitando duplicados cuando ya fue registrada automáticamente.
+            if (candidate.Registration.RegisterAsSelf &&
+                !registeredAsSelf)
+            {
+                services.Add(new ServiceDescriptor(
+                    implementation,
+                    implementation,
+                    lifetime));
+
+                if (verbose)
+                {
+                    BootstrapConsole.Registered(
+                        implementation,
+                        implementation,
+                        lifetimeName);
+                }
 
                 wasRegistered = true;
             }
